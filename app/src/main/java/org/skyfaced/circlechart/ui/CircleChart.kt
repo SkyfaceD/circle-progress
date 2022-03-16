@@ -2,9 +2,7 @@ package org.skyfaced.circlechart.ui
 
 import android.graphics.Paint.Align.CENTER
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -20,23 +18,16 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.skyfaced.circlechart.Empty
-import org.skyfaced.circlechart.Rainbow
-import org.skyfaced.circlechart.Random
 import org.skyfaced.circlechart.ui.theme.CircleChartTheme
+import org.skyfaced.circlechart.util.*
 import kotlin.math.max
 import kotlin.math.min
-
-object CircleChartDefaults {
-    const val ViewSize = 150
-    const val CircleWidth = 25.0f
-    const val FontSize = 25.0f
-}
 
 /**
  * @param prefix applies before [currentProgress] without any formatting
  * @param suffix applies after [currentProgress] without any formatting
  * @param viewSize specify in mind as dp cause it's converts to dp under the hood
+ * @param rainbow overrides static [circleColor]
  */
 @Composable
 fun CircleChart(
@@ -51,7 +42,7 @@ fun CircleChart(
     fontColor: Color = Color.Black,
     prefix: String = String.Empty,
     suffix: String = String.Empty,
-    useRainbow: Boolean = false,
+    rainbow: Rainbow? = null,
     isDebug: Boolean = false,
 ) = CircleChart(
     currentProgress = currentProgress.toFloat(),
@@ -65,7 +56,7 @@ fun CircleChart(
     fontColor = fontColor,
     prefix = prefix,
     suffix = suffix,
-    useRainbow = useRainbow,
+    rainbow = rainbow,
     isDebug = isDebug
 )
 
@@ -73,6 +64,7 @@ fun CircleChart(
  * @param prefix applies before [currentProgress] without any formatting
  * @param suffix applies after [currentProgress] without any formatting
  * @param viewSize specify in mind as dp cause it's converts to dp under the hood
+ * @param rainbow overrides static [circleColor]
  */
 @Composable
 fun CircleChart(
@@ -87,7 +79,7 @@ fun CircleChart(
     fontColor: Color = Color.Black,
     prefix: String = String.Empty,
     suffix: String = String.Empty,
-    useRainbow: Boolean = false,
+    rainbow: Rainbow? = null,
     isDebug: Boolean = false,
 ) {
     val currentProgressState by animateFloatAsState(
@@ -105,6 +97,16 @@ fun CircleChart(
     val fontColorState by animateColorAsState(
         targetValue = fontColor,
         animationSpec = tween(350, easing = FastOutSlowInEasing)
+    )
+    val rainbowTransition = rememberInfiniteTransition()
+    val roundValue = rainbowTransition.animateValue(
+        initialValue = 0,
+        targetValue = 360,
+        typeConverter = Int.VectorConverter,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
     )
 
     Canvas(
@@ -127,9 +129,15 @@ fun CircleChart(
             else innerCircleWidth
         translate(left = left, top = top) {
             val brush =
-                if (!useRainbow) Brush.linearGradient(listOf(circleColorState, circleColorState))
-                else Brush.sweepGradient(
-                    Color.Rainbow,
+                if (rainbow == null) {
+                    Brush.linearGradient(listOf(circleColorState, circleColorState))
+                } else Brush.sweepGradient(
+                    if (rainbow.animate) {
+                        if (rainbow.animationRotation == Rotation.Clockwise)
+                            Color.RainbowHsl.leftShift(roundValue.value)
+                        else
+                            Color.RainbowHsl.rightShift(roundValue.value)
+                    } else Color.RainbowHsl,
                     Offset(center.x - innerCircleWidth, center.y - innerCircleWidth)
                 )
             drawArc(
@@ -137,9 +145,11 @@ fun CircleChart(
                 startAngle = 0f,
                 sweepAngle = sweepAngleState,
                 useCenter = false,
-                style = Stroke(width = innerCircleWidth,
+                style = Stroke(
+                    width = innerCircleWidth,
                     cap = StrokeCap.Round,
-                    join = StrokeJoin.Round),
+                    join = StrokeJoin.Round
+                ),
                 size = Size(
                     size.minDimension - innerCircleWidth * 2,
                     size.minDimension - innerCircleWidth * 2
@@ -159,9 +169,7 @@ fun CircleChart(
             y = size.height / 2 + innerFontSize / 2
         )
 
-        if (isDebug) {
-            drawCrosshair()
-        }
+        if (isDebug) drawCrosshair()
     }
 }
 
@@ -204,6 +212,12 @@ private fun DrawScope.drawCrosshair(
         ),
         strokeWidth = 10f
     )
+}
+
+object CircleChartDefaults {
+    const val ViewSize = 150
+    const val CircleWidth = 25.0f
+    const val FontSize = 25.0f
 }
 
 @Preview(showBackground = true)

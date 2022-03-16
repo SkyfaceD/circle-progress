@@ -37,47 +37,23 @@ import androidx.constraintlayout.compose.MotionScene
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 import org.skyfaced.circlechart.ui.CircleChart
+import org.skyfaced.circlechart.ui.Rainbow
 import org.skyfaced.circlechart.ui.theme.CircleChartTheme
+import org.skyfaced.circlechart.util.Random
+import org.skyfaced.circlechart.util.Rotation
 import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
-import kotlin.math.sin
-import kotlin.random.Random.Default.nextFloat
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainViewModel>()
 
-    @OptIn(ExperimentalFoundationApi::class,
-        androidx.constraintlayout.compose.ExperimentalMotionApi::class,
-        androidx.compose.material.ExperimentalMaterialApi::class,
-        com.google.accompanist.pager.ExperimentalPagerApi::class,
-        dev.chrisbanes.snapper.ExperimentalSnapperApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             CircleChartTheme {
-//                Asd(viewModel)
                 HorizontalPagerScreen(viewModel)
             }
         }
     }
-}
-
-val String.Companion.Empty get() = ""
-
-val Color.Companion.Random get(): Color = Color((nextFloat() * 16777215).toInt() or (0xFF shl 24))
-
-val Color.Companion.Rainbow by lazy<List<Color>>(mode = LazyThreadSafetyMode.NONE) {
-    val colors = mutableListOf<Color>()
-
-    val frequency = 0.2f
-    for (i in 0 until 32) {
-        val red = sin(frequency * i + 0) * 127 + 128
-        val green = sin(frequency * i + 2) * 127 + 128
-        val blue = sin(frequency * i + 4) * 127 + 128
-        colors.add(Color(red.roundToInt(), green.roundToInt(), blue.roundToInt()))
-    }
-
-    colors
 }
 
 @OptIn(ExperimentalPagerApi::class)
@@ -96,8 +72,8 @@ fun HorizontalPagerScreen(viewModel: MainViewModel) {
             viewSize = 150,
             maxProgress = state.maxProgress,
             currentProgress = state.folders[pagerState.currentPage].size,
-//            useRainbow = true,
-            circleColor = Color.Random
+            rainbow = Rainbow(true, Rotation.Clockwise),
+//            circleColor = Color.Random
         )
 
         ScrollableTabRow(
