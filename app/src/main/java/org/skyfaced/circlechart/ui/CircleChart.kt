@@ -99,7 +99,7 @@ fun CircleChart(
         animationSpec = tween(350, easing = FastOutSlowInEasing)
     )
     val rainbowTransition = rememberInfiniteTransition()
-    val roundValue = rainbowTransition.animateValue(
+    val rainbowState = rainbowTransition.animateValue(
         initialValue = 0,
         targetValue = 360,
         typeConverter = Int.VectorConverter,
@@ -134,9 +134,9 @@ fun CircleChart(
                 } else Brush.sweepGradient(
                     if (rainbow.animate) {
                         if (rainbow.animationRotation == Rotation.Clockwise)
-                            Color.RainbowHsl.leftShift(roundValue.value)
+                            Color.RainbowHsl.leftShift(rainbowState.value)
                         else
-                            Color.RainbowHsl.rightShift(roundValue.value)
+                            Color.RainbowHsl.rightShift(rainbowState.value)
                     } else Color.RainbowHsl,
                     Offset(center.x - innerCircleWidth, center.y - innerCircleWidth)
                 )
