@@ -37,8 +37,8 @@ import androidx.constraintlayout.compose.MotionScene
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 import org.skyfaced.circlechart.ui.CircleChart
-import org.skyfaced.circlechart.ui.Rainbow
 import org.skyfaced.circlechart.ui.theme.CircleChartTheme
+import org.skyfaced.circlechart.util.Rainbow
 import org.skyfaced.circlechart.util.Random
 import org.skyfaced.circlechart.util.Rotation
 import kotlin.math.absoluteValue
