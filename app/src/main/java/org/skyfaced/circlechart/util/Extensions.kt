@@ -56,7 +56,8 @@ fun Color.Companion.RainbowHsl(
     hsl(it.toFloat(), saturation, lightness, alpha)
 }
 
-@OptIn(ExperimentalGraphicsApi::class)
 fun List<Color>.rightShift(shift: Int) = drop(shift) + take(shift)
 
 fun List<Color>.leftShift(shift: Int) = takeLast(shift) + dropLast(shift)
+
+fun lerp(start: Float, stop: Float, fraction: Float) = (start * (1 - fraction) + stop * fraction)
