@@ -10,6 +10,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -64,16 +66,29 @@ fun HorizontalPagerScreen(viewModel: MainViewModel) {
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
 
+    val scale = remember { mutableStateOf(1f) }
+    val offset = remember { mutableStateOf(Offset.Zero) }
+    val transformState = rememberTransformableState { zoomChange, offsetChange, _ ->
+        scale.value *= zoomChange
+        offset.value += offsetChange
+    }
+
     Column {
         CircleChart(
             modifier = Modifier
+                .graphicsLayer(
+                    scaleX = scale.value,
+                    scaleY = scale.value,
+                    translationX = offset.value.x,
+                    translationY = offset.value.y
+                )
+                .transformable(transformState)
                 .align(Alignment.CenterHorizontally)
                 .padding(vertical = 48.dp),
             viewSize = 150,
             maxProgress = state.maxProgress,
             currentProgress = state.folders[pagerState.currentPage].size,
             rainbow = Rainbow(true, Rotation.Clockwise),
-//            circleColor = Color.Random
         )
 
         ScrollableTabRow(
@@ -133,8 +148,8 @@ fun lerp(start: Float, stop: Float, fraction: Float) = (start * (1 - fraction) +
 
 @OptIn(ExperimentalFoundationApi::class,
     androidx.constraintlayout.compose.ExperimentalMotionApi::class,
-    androidx.compose.material.ExperimentalMaterialApi::class,
-    com.google.accompanist.pager.ExperimentalPagerApi::class,
+    ExperimentalMaterialApi::class,
+    ExperimentalPagerApi::class,
     dev.chrisbanes.snapper.ExperimentalSnapperApi::class)
 @Composable
 fun Asd(viewModel: MainViewModel) {
