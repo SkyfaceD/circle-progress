@@ -98,16 +98,21 @@ fun CircleChart(
         targetValue = fontColor,
         animationSpec = tween(350, easing = FastOutSlowInEasing)
     )
-    val rainbowTransition = rememberInfiniteTransition()
-    val rainbowState = rainbowTransition.animateValue(
-        initialValue = 0,
-        targetValue = 360,
-        typeConverter = Int.VectorConverter,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+    val rainbowState = rainbow?.let {
+        val rainbowTransition = rememberInfiniteTransition()
+        return@let rainbowTransition.animateValue(
+            initialValue = 0,
+            targetValue = 360,
+            typeConverter = Int.VectorConverter,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = rainbow.animationDurationMillis,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Restart
+            )
         )
-    )
+    }
 
     Canvas(
         modifier = modifier.then(Modifier.size(viewSize.dp))
@@ -129,7 +134,7 @@ fun CircleChart(
             else innerCircleWidth
         translate(left = left, top = top) {
             val brush =
-                if (rainbow == null) {
+                if (rainbow == null || rainbowState == null) {
                     Brush.linearGradient(listOf(circleColorState, circleColorState))
                 } else Brush.sweepGradient(
                     if (rainbow.animate) {
