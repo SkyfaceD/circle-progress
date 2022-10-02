@@ -1,4 +1,4 @@
-### Preview
+# Rainbow circle bar writter on jetpack compose using canvas.
 
-![Preview](./.demo/videos/circle-pb.mp4)
+### Preview
 ![Preview](./.demo/gifs/circle-pb.gif)
